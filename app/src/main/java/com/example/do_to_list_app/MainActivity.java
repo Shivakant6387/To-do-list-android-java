@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent=new Intent(MainActivity.this,DataInsertActivity.class);
+                intent.putExtra("type","addMode");
                 startActivityForResult(intent,1);
             }
         });
@@ -53,7 +54,20 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                noteViewModel.delete(adapter.getNote(viewHolder.getAdapterPosition()));
+              //  noteViewModel.delete(adapter.getNote(viewHolder.getAdapterPosition()));
+                if (direction==ItemTouchHelper.RIGHT){
+                    noteViewModel.delete(adapter.getNote(viewHolder.getAdapterPosition()));
+                    Toast.makeText(MainActivity.this,"note deleted",Toast.LENGTH_SHORT).show();
+                }
+                else {
+                   // Toast.makeText(MainActivity.this,"updating",Toast.LENGTH_SHORT).show();
+                    Intent intent=new Intent(MainActivity.this,DataInsertActivity.class);
+                    intent.putExtra("title",adapter.getNote(viewHolder.getAdapterPosition()).getTitle());
+                    intent.putExtra("type","update");
+                    intent.putExtra("disp",adapter.getNote(viewHolder.getAdapterPosition()).getDisp());
+                    intent.putExtra("id",adapter.getNote(viewHolder.getAdapterPosition()).getId());
+                    startActivityForResult(intent,2);
+                }
             }
         }).attachToRecyclerView(binding.Rv);
     }
@@ -68,6 +82,14 @@ public class MainActivity extends AppCompatActivity {
             noteViewModel.insert(note);
             Toast.makeText(this,"note added",Toast.LENGTH_SHORT).show();
 
+        }
+        else if (requestCode==2){
+            String title=data.getStringExtra("title");
+            String disp=data.getStringExtra("disp");
+            Note  note=new Note(title,disp);
+            note.setId(data.getIntExtra("id",0));
+            noteViewModel.update(note);
+            Toast.makeText(this,"note updated",Toast.LENGTH_SHORT).show();
         }
     }
 }
